@@ -6,7 +6,7 @@ pub struct Chunk {
     end: usize,
     original: String,
     content: String,
-    pub(crate)  intro: String,
+    pub(crate) intro: String,
     pub(crate) outro: String,
     pub(crate) next: Option<Box<Chunk>>,
     pub(crate) previous: Option<*mut Chunk>,
@@ -27,6 +27,15 @@ impl Chunk {
             edited: false,
         };
     }
+
+    pub fn append_left(&mut self, content: &str) {
+        self.outro += content;
+    }
+
+    pub fn append_right(&mut self, content: &str) {
+        self.intro = self.intro.clone() + content;
+    }
+
     pub fn contain(&self, index: usize) -> bool {
         return index >= self.start && index <= self.end;
     }

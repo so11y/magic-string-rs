@@ -65,31 +65,25 @@ impl MagicString {
     }
 
     pub fn append_left(&mut self, index: usize, content: &str) -> Result<(), String> {
-        if self.byte_start.get(&index).is_none() {
-            split_chunk(self, index)?;
-        }
-        if self.byte_end.get(&index).is_none() {
-            split_chunk(self, index)?;
-        }
-        let chunk = self
-            .byte_start
-            .get(&index)
-            .unwrap_or(self.byte_end.get(&index).unwrap());
+        split_chunk(self, index)?;
 
-        unsafe {
-            let chunk = &mut **chunk;
-            chunk.intro += content;
+        let chunk = self.byte_end.get(&index);
+
+        if chunk.is_some() {
+            unsafe {
+                let chunk = &mut **chunk.unwrap();
+                chunk.append_left(content);
+            }
+        } else {
+            self.intro += content;
         }
+
         Ok(())
     }
 
     pub fn remove(&mut self, start: usize, end: usize) -> Result<(), String> {
-        if self.byte_start.get(&start).is_none() {
-            split_chunk(self, start)?;
-        }
-        if self.byte_end.get(&end).is_none() {
-            split_chunk(self, end)?;
-        }
+        split_chunk(self, start)?;
+        split_chunk(self, end)?;
         vec![
             self.byte_start.get(&start).unwrap(),
             self.byte_start.get(&end).unwrap(),
