@@ -42,8 +42,8 @@ impl Chunk {
         let slice_index = index - self.start;
         let original_before = self.original[..slice_index].to_string();
         let original_after = self.original[slice_index..].to_string();
-        self.original = original_before.clone();
         let mut new_chunk = Chunk::new(index, self.end, &original_after);
+        self.original = original_before.clone();
         self.end = index;
         self.content = original_before;
         new_chunk.next = self.next.take();
