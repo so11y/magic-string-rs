@@ -35,7 +35,6 @@ mod tests {
         m.append_left(3, " world").unwrap();
         assert_eq!(m.to_string(), "hel worldlo");
     }
-//    越界的单词是
 
     #[test]
     fn test_append_left_overstep_a_boundary() {

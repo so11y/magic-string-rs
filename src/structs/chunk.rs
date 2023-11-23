@@ -1,11 +1,9 @@
-use crate::MagicString;
-
 #[derive(Debug, Clone)]
 pub struct Chunk {
-    start: usize,
-    end: usize,
-    original: String,
-    content: String,
+    pub(crate) start: usize,
+    pub(crate) end: usize,
+    pub(crate) original: String,
+    pub(crate) content: String,
     pub(crate) intro: String,
     pub(crate) outro: String,
     pub(crate) next: Option<Box<Chunk>>,
@@ -68,40 +66,4 @@ impl Chunk {
         self.intro.clear();
         self.outro.clear();
     }
-}
-
-pub fn split_chunk(ms: &mut MagicString, index: usize) -> Result<(), String> {
-    if ms.byte_start.contains_key(&index) || ms.byte_end.contains_key(&index) {
-        return Ok(());
-    }
-    let mut perv_chunk = Some(unsafe { &mut *ms.prev_chunk });
-
-    while perv_chunk.is_some() {
-        let cur = perv_chunk.unwrap();
-        if cur.contain(index) {
-            return chunk_link(ms, cur, index);
-        }
-        let next = cur.next.as_mut();
-        if next.is_some() {
-            perv_chunk = Some(next.unwrap());
-        } else {
-            return Ok(());
-        }
-    }
-    return Ok(());
-}
-
-pub fn chunk_link(m: &mut MagicString, chunk: &mut Chunk, index: usize) -> Result<(), String> {
-    if chunk.edited && chunk.content.len() > 0 {
-        return Err(String::from(
-            "Cannot split a chunk that has already been edited",
-        ));
-    }
-    let new_chunk = chunk.split(index).unwrap();
-
-    m.byte_end
-        .insert(new_chunk.end, &mut **new_chunk as *mut Chunk);
-    m.byte_start.insert(index, chunk as *mut Chunk);
-    m.byte_end.insert(index, chunk as *mut Chunk);
-    Ok(())
 }
