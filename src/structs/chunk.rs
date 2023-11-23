@@ -1,5 +1,3 @@
-use std::{cell::RefCell, rc::Rc};
-
 use crate::MagicString;
 
 #[derive(Debug, Clone)]
@@ -8,11 +6,11 @@ pub struct Chunk {
     end: usize,
     original: String,
     content: String,
-    intro: String,
-    outro: String,
-    pub next: Option<Box<Chunk>>,
-    pub previous: Option<*mut Chunk>,
-    pub edited: bool,
+    pub(crate)  intro: String,
+    pub(crate) outro: String,
+    pub(crate) next: Option<Box<Chunk>>,
+    pub(crate) previous: Option<*mut Chunk>,
+    pub(crate) edited: bool,
 }
 
 impl Chunk {
@@ -55,18 +53,24 @@ impl Chunk {
         self.content = content.to_string();
         self.edited = true;
     }
+
+    pub fn remove(&mut self) {
+        self.content.clear();
+        self.intro.clear();
+        self.outro.clear();
+    }
 }
 
-pub fn split_chuck(m: &mut MagicString, index: usize) -> Result<(), String> {
-    if m.byte_start.contains_key(&index) || m.byte_end.contains_key(&index) {
+pub fn split_chunk(ms: &mut MagicString, index: usize) -> Result<(), String> {
+    if ms.byte_start.contains_key(&index) || ms.byte_end.contains_key(&index) {
         return Ok(());
     }
-    let mut perv_chunk = Some(unsafe { &mut *m.prev_chunk });
+    let mut perv_chunk = Some(unsafe { &mut *ms.prev_chunk });
 
     while perv_chunk.is_some() {
         let cur = perv_chunk.unwrap();
         if cur.contain(index) {
-            return chunk_link(m, cur, index);
+            return chunk_link(ms, cur, index);
         }
         let next = cur.next.as_mut();
         if next.is_some() {
