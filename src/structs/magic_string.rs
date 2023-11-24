@@ -15,11 +15,11 @@ pub struct MagicString {
 impl MagicString {
     pub fn new(content: &str) -> Self {
         let mut chunk = Box::new(Chunk::new(0, content.len(), content));
-        let prev_chunk = &mut *chunk as *mut Chunk;
+        let last_searched_chunk = &mut *chunk as *mut Chunk;
         let mut byte_start = HashMap::new();
         let mut byte_end = HashMap::new();
-        byte_start.insert(0, prev_chunk);
-        byte_end.insert(content.len(), prev_chunk);
+        byte_start.insert(0, last_searched_chunk);
+        byte_end.insert(content.len(), last_searched_chunk);
         return Self {
             by_start: byte_start,
             by_end: byte_end,
@@ -27,7 +27,7 @@ impl MagicString {
             intro: String::new(),
             outro: String::new(),
             first_chunk: chunk,
-            last_searched_chunk: prev_chunk,
+            last_searched_chunk,
         };
     }
 
