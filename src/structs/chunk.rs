@@ -40,8 +40,10 @@ impl Chunk {
 
     pub fn split(&mut self, index: usize) -> Option<&mut Box<Chunk>> {
         let slice_index = index - self.start;
-        let original_before = self.original[..slice_index].to_string();
-        let original_after = self.original[slice_index..].to_string();
+        let chars: Vec<char> = self.original.chars().collect();
+
+        let original_before: String = chars[..slice_index].iter().collect();
+        let original_after: String = chars[slice_index..].iter().collect();
         let mut new_chunk = Chunk::new(index, self.end, &original_after);
         self.original = original_before.clone();
         self.end = index;
