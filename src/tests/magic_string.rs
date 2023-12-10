@@ -1,5 +1,6 @@
 #[cfg(test)]
-mod tests {
+
+pub mod tests {
     use crate::MagicString;
 
     #[test]
@@ -19,6 +20,7 @@ mod tests {
     fn test_prepend() {
         let mut m = MagicString::new("world");
         m.prepend("hello ");
+        assert_eq!(m.has_changed(), true);
         assert_eq!(m.to_string(), "hello world");
     }
 
