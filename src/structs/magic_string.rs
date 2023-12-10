@@ -7,6 +7,7 @@ pub struct MagicString {
     pub byte_end: HashMap<usize, *mut Chunk>,
     pub root_chunk: Box<Chunk>,
     pub prev_chunk: *mut Chunk,
+    original: String,
     intro: String,
     outro: String,
 }
@@ -18,14 +19,15 @@ impl MagicString {
         let mut byte_end = HashMap::new();
         byte_start.insert(0, prev_chunk);
         byte_end.insert(content.len(), prev_chunk);
-        return Self {
+        Self {
             byte_start,
             byte_end,
+            original: content.to_string(),
             intro: String::new(),
             outro: String::new(),
             root_chunk: chunk,
             prev_chunk,
-        };
+        }
     }
 
     pub fn overwrite(&mut self, start: usize, end: usize, content: &str) -> Result<(), String> {
@@ -39,22 +41,6 @@ impl MagicString {
             }
         }
         Ok(())
-    }
-
-    pub fn to_string(&mut self) -> String {
-        let mut str = self.intro.clone();
-        let mut chunk = Some(&*self.root_chunk);
-        while chunk.is_some() {
-            let cur = chunk.unwrap();
-            str += cur.to_string().as_str();
-
-            if cur.next.is_some() {
-                chunk = Some(cur.next.as_ref().unwrap().as_ref());
-            } else {
-                break;
-            }
-        }
-        return str + self.outro.as_str();
     }
 
     pub fn prepend(&mut self, content: &str) {
@@ -96,6 +82,10 @@ impl MagicString {
         });
         Ok(())
     }
+
+    pub fn has_changed(&self) -> bool {
+        self.original != self.to_string()
+    }
 }
 
 pub fn split_chunk(ms: &mut MagicString, index: usize) -> Result<(), String> {
@@ -116,9 +106,8 @@ pub fn split_chunk(ms: &mut MagicString, index: usize) -> Result<(), String> {
             return Ok(());
         }
     }
-    return Ok(());
+    Ok(())
 }
-
 
 pub fn chunk_link(m: &mut MagicString, chunk: &mut Chunk, index: usize) -> Result<(), String> {
     if chunk.edited && chunk.content.len() > 0 {
@@ -133,4 +122,22 @@ pub fn chunk_link(m: &mut MagicString, chunk: &mut Chunk, index: usize) -> Resul
     m.byte_start.insert(index, chunk as *mut Chunk);
     m.byte_end.insert(index, chunk as *mut Chunk);
     Ok(())
+}
+
+impl ToString for MagicString {
+    fn to_string(&self) -> String {
+        let mut str = self.intro.clone();
+        let mut chunk = Some(&*self.root_chunk);
+        while chunk.is_some() {
+            let cur = chunk.unwrap();
+            str += cur.to_string().as_str();
+
+            if cur.next.is_some() {
+                chunk = Some(cur.next.as_ref().unwrap().as_ref());
+            } else {
+                break;
+            }
+        }
+        return str + self.outro.as_str();
+    }
 }

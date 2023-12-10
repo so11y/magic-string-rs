@@ -1,4 +1,4 @@
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Chunk {
     pub(crate) start: usize,
     pub(crate) end: usize,
@@ -12,8 +12,8 @@ pub struct Chunk {
 }
 
 impl Chunk {
-    pub fn new(start: usize, end: usize, content: &str) -> Chunk {
-        return Chunk {
+    pub fn new(start: usize, end: usize, content: &str) -> Self {
+        Self {
             start,
             end,
             original: content.to_string(),
@@ -23,7 +23,7 @@ impl Chunk {
             next: None,
             previous: None,
             edited: false,
-        };
+        }
     }
 
     pub fn append_left(&mut self, content: &str) {
@@ -35,7 +35,7 @@ impl Chunk {
     }
 
     pub fn contain(&self, index: usize) -> bool {
-        return index >= self.start && index <= self.end;
+        index >= self.start && index <= self.end
     }
 
     pub fn split(&mut self, index: usize) -> Option<&mut Box<Chunk>> {
@@ -52,10 +52,6 @@ impl Chunk {
         return self.next.as_mut();
     }
 
-    pub fn to_string(&self) -> String {
-        return self.intro.clone() + self.content.as_str() + self.outro.as_str();
-    }
-
     pub fn edit(&mut self, content: &str) {
         self.content = content.to_string();
         self.edited = true;
@@ -65,5 +61,22 @@ impl Chunk {
         self.content.clear();
         self.intro.clear();
         self.outro.clear();
+    }
+}
+
+impl ToString for Chunk {
+    fn to_string(&self) -> String {
+        self.intro.clone() + self.content.as_str() + self.outro.as_str()
+    }
+}
+impl Clone for Chunk {
+    fn clone(&self) -> Self {
+        let mut chunk = Chunk::new(self.start, self.end, self.original.as_str());
+        chunk.intro = self.intro.clone();
+        chunk.outro = self.outro.clone();
+        chunk.content = self.content.clone();
+        chunk.edited = self.edited;
+
+        chunk
     }
 }
