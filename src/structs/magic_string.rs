@@ -16,18 +16,18 @@ impl MagicString {
     pub fn new(content: &str) -> Self {
         let mut chunk = Box::new(Chunk::new(0, content.len(), content));
         let last_searched_chunk = &mut *chunk as *mut Chunk;
-        let mut byte_start = HashMap::new();
-        let mut byte_end = HashMap::new();
-        byte_start.insert(0, prev_chunk);
-        byte_end.insert(content.len(), prev_chunk);
+        let mut by_start = HashMap::new();
+        let mut by_end = HashMap::new();
+        by_start.insert(0, last_searched_chunk);
+        by_end.insert(content.len(), last_searched_chunk);
         Self {
-            byte_start,
-            byte_end,
+            by_start,
+            by_end,
             original: content.to_string(),
             intro: String::new(),
             outro: String::new(),
-            root_chunk: chunk,
-            prev_chunk,
+            first_chunk: chunk,
+            last_searched_chunk,
         }
     }
 
@@ -107,10 +107,6 @@ impl MagicString {
 
         Ok(())
     }
-
-    pub fn has_changed(&self) -> bool {
-        self.original != self.to_string()
-    }
 }
 
 pub fn split(ms: &mut MagicString, index: usize) -> Result<(), String> {
@@ -161,7 +157,7 @@ pub fn split_chunk(m: &mut MagicString, chunk: &mut Chunk, index: usize) -> Resu
 impl ToString for MagicString {
     fn to_string(&self) -> String {
         let mut str = self.intro.clone();
-        let mut chunk = Some(&*self.root_chunk);
+        let mut chunk = Some(&*self.first_chunk);
         while chunk.is_some() {
             let cur = chunk.unwrap();
             str += cur.to_string().as_str();
