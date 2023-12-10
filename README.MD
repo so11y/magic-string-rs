@@ -23,6 +23,7 @@ MagicString 是一个工具，用于在不修改原始字符串的情况下执�
 - [x] appendRight
 - [x] overwrite
 - [x] remove
+- [x] hasChanged
 - [ ] trimLines
 - [ ] prependLeft
 - [ ] prependRight
